@@ -148,4 +148,8 @@ public class ErrorLogService {
     public List<ErrorLog> searchLogsByTimestampBetween(LocalDateTime start, LocalDateTime end) {
         return errorLogRepository.findByTimestampBetween(start, end);
     }
+
+	public List<ErrorLog> findAll() {
+		return errorLogRepository.findAll();
+	}
 }

@@ -6,19 +6,20 @@ spring:
 #      prefix: /view/
 #      suffix: .jsp
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/errorlogdb?useSSL=false&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
     password: 
   jpa:
-    database-platform: org.hibernate.dialect.MariaDBDialect
     hibernate:
       ddl-auto: update
     show-sql: true
 server:
-  port: 8081
+  port: 8082
 log:
   file:
     path: C:/temp/app.log
+jwt:
+  secret: yourNewAndValidBase64SecretKeyStringWithNoHyphensOrSpaces
 #  servlet:
 #    context-path: /test

@@ -1,6 +1,6 @@
 package com.example.ErrorLogProcessor.Controller;
 
-import java.time.LocalDateTime;
+//import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -14,32 +14,32 @@ import com.example.ErrorLogProcessor.Service.ErrorLogService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/logs")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173") // 리액트 개발 서버 주소에 맞게 수정 가능
 public class ErrorLogController {
 
     private final ErrorLogService errorLogService;
 
-    @GetMapping("/add-test")
-    public String addTestErrorLog() {
-        LocalDateTime now = LocalDateTime.now();
-
-        ErrorLog testLog = ErrorLog.builder()
-                .message("Test Error : DB connection failed.")
-                .level("ERROR")
-                .timestamp(now)
-                .status("NEW")
-                .stackTrace("java.lang.NullPointerException: Cannot invoke "
-                        + "\"java.lang.Object.toString()\" because \"myObject\" "
-                        + "is null\n\tat com.example.MyService."
-                        + "doSomething(MyService.java:45)\n\tat "
-                        + "com.example.MyController.handleRequest(MyController.java:23)")
-                .build();
-
-        errorLogService.saveErrorLog(testLog);
-        return "테스트 에러 로그 저장 성공: " + testLog.getMessage();
-    }
+//    @GetMapping("/add-test")
+//    public String addTestErrorLog() {
+//        LocalDateTime now = LocalDateTime.now();
+//
+//        ErrorLog testLog = ErrorLog.builder()
+//                .message("Test Error : DB connection failed.")
+//                .level("ERROR")
+//                .timestamp(now)
+//                .status("NEW")
+//                .stackTrace("java.lang.NullPointerException: Cannot invoke "
+//                        + "\"java.lang.Object.toString()\" because \"myObject\" "
+//                        + "is null\n\tat com.example.MyService."
+//                        + "doSomething(MyService.java:45)\n\tat "
+//                        + "com.example.MyController.handleRequest(MyController.java:23)")
+//                .build();
+//
+//        errorLogService.saveErrorLog(testLog);
+//        return "테스트 에러 로그 저장 성공: " + testLog.getMessage();
+//    }
 
     @PostMapping("/parse-and-save")
     public ResponseEntity<String> receiveLog(@RequestBody Map<String, String> payload) {
@@ -74,5 +74,10 @@ public class ErrorLogController {
             @RequestParam(required = false) String level,
             @RequestParam(required = false) String status) {
         return errorLogService.searchAndfilterLogs(keyword, level, status);
+    }
+    
+    @GetMapping("/logs")
+    public List<ErrorLog> getAllLogs() {
+    	return errorLogService.findAll();
     }
 }
