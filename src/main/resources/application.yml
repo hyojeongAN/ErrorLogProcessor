@@ -20,6 +20,7 @@ log:
   file:
     path: C:/temp/app.log
 jwt:
-  secret: yourNewAndValidBase64SecretKeyStringWithNoHyphensOrSpaces
+  expirationMs: 3600000
+  secret: YourJwtSecretKeyMustBeAtLeast256BitsLongAndShouldBeRandomlyGenerated
 #  servlet:
 #    context-path: /test

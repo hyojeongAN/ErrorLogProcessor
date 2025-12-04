@@ -2,19 +2,16 @@ package com.example.ErrorLogProcessor.Controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.ErrorLogProcessor.Config.jwt.JwtTokenProvider;
-import com.example.ErrorLogProcessor.Dto.LoginRequestDto;
-import com.example.ErrorLogProcessor.Dto.TokenDto;
-import com.example.ErrorLogProcessor.Entity.User;
-import com.example.ErrorLogProcessor.Service.UserService;
+import com.example.ErrorLogProcessor.Dto.auth.LoginRequestDto;
+import com.example.ErrorLogProcessor.Dto.auth.TokenDto;
+import com.example.ErrorLogProcessor.Dto.auth.UserJoinRequestDto;
+import com.example.ErrorLogProcessor.Dto.auth.UserResponseDto;
+import com.example.ErrorLogProcessor.Service.AuthService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,31 +20,35 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthController {
 
-	private final UserService userService;
-	private final JwtTokenProvider jwtTokenProvider;
-	private final AuthenticationManagerBuilder authenticationManagerBuilder;
+	private final AuthService authService;
 	
+	/**
+     * 회원가입 API
+     * POST /api/auth/userjoin
+     * @param userJoinRequestDto 회원가입 요청 DTO
+     * @return 성공 시 UserResponseDto와 HTTP 201 Created 반환
+     * @throws IllegalArgumentException 아이디/이메일 중복 시
+     */
 	@PostMapping("/userjoin")
-	public ResponseEntity<User> UserJoin(@RequestBody User user) {
-		try {
-			User created = userService.UserJoin(user);
-			// 비밀번호는 절대 클라이언트에게 직접 노출하면 안 되므로 null 처리 또는 DTO 사용
-			created.setPassword(null); // 비밀번호 필드를 비워서 반환
-			return ResponseEntity.status(HttpStatus.CREATED).body(created);
-		} catch (IllegalArgumentException e) {
-			return ResponseEntity.badRequest().body(null); // 실제로는 ErrorResponseDto 사용
-		}
+	public ResponseEntity<UserResponseDto> UserJoin(@RequestBody UserJoinRequestDto userJoinRequestDto) {
+		
+		// AuthService를 통해 회원가입 처리 후 UserResponseDto로 변환하여 반환
+        UserResponseDto responseDto = UserResponseDto.from(authService.UserJoin(userJoinRequestDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto); // 201 Created 상태 코드와 함께 응답
 	}
 	
+	/**
+     * 로그인 API
+     * POST /api/auth/login
+     * @param loginRequestDto 로그인 요청 DTO
+     * @return 성공 시 TokenDto (JWT)와 HTTP 200 OK 반환
+     * @throws IllegalArgumentException 로그인 실패 시 (아이디/비밀번호 불일치)
+     */
 	@PostMapping("/login")
 	public ResponseEntity<TokenDto> login(@RequestBody LoginRequestDto loginRequestDto) {
-		UsernamePasswordAuthenticationToken authenticationToken = 
-				new UsernamePasswordAuthenticationToken(loginRequestDto.getLoginId(), loginRequestDto.getPassword());
 		
-		Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-		
-		String jwtToken = jwtTokenProvider.generateToken(authentication);
-		
-		return ResponseEntity.ok(new TokenDto(jwtToken));
+		 // AuthService를 통해 로그인 처리 후 JWT 토큰 반환
+		TokenDto tokenDto = authService.login(loginRequestDto);
+		return ResponseEntity.ok(tokenDto);  // 200 OK 상태 코드와 함께 응답
 	}
 }

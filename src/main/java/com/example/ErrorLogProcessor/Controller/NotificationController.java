@@ -1,5 +1,5 @@
 package com.example.ErrorLogProcessor.Controller;
 
-public class ErrorLogController {
+public class NotificationController {
 
 }

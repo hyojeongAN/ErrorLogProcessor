@@ -1,40 +1,60 @@
 package com.example.ErrorLogProcessor.Entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "users")
-@Getter
-@Setter
+@Table(name= "users")
+@Getter @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY) // PK 자동 증가
 	private Long id;
 	
-	@Column(nullable = false)
-	private String username;
-	
-	@Column(nullable = false, unique = true)
+	@Column(name = "loginId", nullable = false, unique = true, length = 50)
 	private String loginId;
 	
-	@Column(nullable = false)
+	@Column(nullable = false, length = 255)
 	private String password;
 	
-	@Column(nullable = false)
+	@Column(nullable = false, length = 100)
+	private String name;
+	
+	@Column(nullable = false, length = 255, unique = true)
 	private String email;
 	
-	private boolean enableEmailNotifications = true; // 이메일 활성화 여부
-	private boolean enableWebAppNotifications = true; // 웹 알림 활성화 여부
-	private String preferredTheme = "dark"; // 선호 테마 (dark, light)
+	@Column(name = "createdAt", nullable = false, updatable = false)
+	private LocalDateTime createdAt; //회원가입한 시간
 	
+	@Column(name = "updatedAt", nullable = false)
+	private LocalDateTime updatedAt;
+	
+	@PrePersist
+	protected void onCreate() {
+		this.createdAt = LocalDateTime.now();
+		this.updatedAt = LocalDateTime.now();
+	}
+	
+	@PreUpdate
+	protected void onUpdate() {
+		this.updatedAt = LocalDateTime.now();
+	}
+
 }

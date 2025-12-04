@@ -1,4 +1,4 @@
-package com.example.ErrorLogProcessor.Dto;
+package com.example.ErrorLogProcessor.Dto.auth;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,5 +1,5 @@
 package com.example.ErrorLogProcessor.Service;
 
-public class ErrorLogService {
+public class NotificationService {
 
 }
