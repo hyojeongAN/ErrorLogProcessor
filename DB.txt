@@ -13,4 +13,7 @@ DESC error_log;
 
 #delete from error_log;
 
-DROP TABLE error_log
+DROP TABLE error_log;
+
+SELECT * FROM users;
+DESC users;

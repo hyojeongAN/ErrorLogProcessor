@@ -18,14 +18,14 @@ import lombok.Setter;
 public class UserResponseDto {
 	private Long id;
 	private String loginId;
-	private String name;
+	private String userName;
 	private String email;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
 	
 	public static UserResponseDto from(User user) {
 		return UserResponseDto.builder()
-				.id(user.getId()).loginId(user.getLoginId()).name(user.getName())
+				.id(user.getId()).loginId(user.getLoginId()).userName(user.getUserName())
 				.email(user.getEmail()).createdAt(user.getCreatedAt()).updatedAt(user.getUpdatedAt()).build();
 			
 	}

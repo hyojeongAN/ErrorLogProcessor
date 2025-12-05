@@ -36,7 +36,7 @@ public class UserService {
 		User newUser = User.builder()
 				.loginId(userJoinRequestDto.getLoginId())
 				.password(encodedPassword) // 암호화된 비밀번호 저장
-				.name(userJoinRequestDto.getName())
+				.userName(userJoinRequestDto.getUserName())
 				.email(userJoinRequestDto.getEmail())
 				.build();
 		
@@ -61,7 +61,7 @@ public class UserService {
 	                .orElseThrow(() -> new IllegalArgumentException("해당하는 유저를 찾을 수 없습니다."));
 		
 		// 1. 이름 및 이메일 업데이트 (null이 아닌 경우만 업데이트)
-	        Optional.ofNullable(updateRequestDto.getName()).ifPresent(user::setName);
+	        Optional.ofNullable(updateRequestDto.getName()).ifPresent(user::setUserName);
 	        Optional.ofNullable(updateRequestDto.getEmail()).ifPresent(user::setEmail);
 
 	        // 2. 비밀번호 변경 요청이 있다면 처리

@@ -31,6 +31,10 @@ public class AuthController {
      */
 	@PostMapping("/userjoin")
 	public ResponseEntity<UserResponseDto> UserJoin(@RequestBody UserJoinRequestDto userJoinRequestDto) {
+		System.out.println(userJoinRequestDto.getUserName());
+		System.out.println(userJoinRequestDto.getLoginId());
+		System.out.println(userJoinRequestDto.getEmail());
+		System.out.println(userJoinRequestDto.getPassword());
 		
 		// AuthService를 통해 회원가입 처리 후 UserResponseDto로 변환하여 반환
         UserResponseDto responseDto = UserResponseDto.from(authService.UserJoin(userJoinRequestDto));
