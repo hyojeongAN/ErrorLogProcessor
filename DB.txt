@@ -8,12 +8,12 @@ SHOW TABLES;
 
 SELECT VERSION();
 
-SELECT * FROM error_log;
-DESC error_log;
-
-#delete from error_log;
-
-DROP TABLE error_log;
+SELECT * FROM error_logs;
+DESC error_logs;
 
 SELECT * FROM users;
 DESC users;
+
+
+#delete from error_log;
+#DROP TABLE error_log;
