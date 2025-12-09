@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -66,7 +67,7 @@ public class SecurityConfig {
     		.httpBasic(AbstractHttpConfigurer::disable)
     		.formLogin(AbstractHttpConfigurer::disable)
     		.authorizeHttpRequests(authorize -> authorize
-//    		.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+    		.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 //    		.requestMatchers(HttpMethod.GET, "/api/logs", "api/logs/**").permitAll()
 //    		.requestMatchers("/api/auth/**", "/test-log").permitAll()
     		.requestMatchers("/api/**").permitAll()
