@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final CustomUserDetailsService customUserDetailsService;
-	private final JwtAuthenticationFilter jwtAuthenticationFilter;
+	private final JwtAuthenticationFilter jwtAuthenticationFilter; // ✨✨ 이 필터가 다시 활성화될 거야! ✨✨
 	
 	@Bean
 	PasswordEncoder passwordEncoder() {

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.logging.Logger;
 
@@ -28,7 +29,8 @@ public class JwtTokenProvider {
     public void init() {
         // base64로 인코딩된 문자열 형태의 secretKey를 Key 객체로 변환
         // Keys.hmacShaKeyFor()는 바이트 배열로부터 Key를 생성
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    	byte[] keyBytes = Base64.getDecoder().decode(secretKey);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     /**

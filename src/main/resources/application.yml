@@ -22,5 +22,11 @@ log:
 jwt:
   expirationMs: 3600000
   secret: YourJwtSecretKeyMustBeAtLeast256BitsLongAndShouldBeRandomlyGenerated
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    com.example.ErrorLogProcessor: DEBUG
 #  servlet:
 #    context-path: /test
