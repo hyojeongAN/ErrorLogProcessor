@@ -1,4 +1,3 @@
-// src/main/java/com/example/ErrorLogProcessor/Config/DbLogAppender.java
 package com.example.ErrorLogProcessor.Config;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;

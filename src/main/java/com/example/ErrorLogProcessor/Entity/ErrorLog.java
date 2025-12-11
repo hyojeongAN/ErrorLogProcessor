@@ -31,4 +31,9 @@ public class ErrorLog {
 	@Column(columnDefinition = "TEXT")
 	private String message;
 	
+	 @Column(columnDefinition = "TEXT")
+	 private String stackTrace;
+	
+	@Column(length = 50)
+	private String loginId;
 }

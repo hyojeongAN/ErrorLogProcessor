@@ -18,15 +18,16 @@ server:
   port: 8082
 log:
   file:
-    path: C:/temp/app.log
+    path: ./logs/app.log
 jwt:
-  expirationMs: 3600000
-  secret: YourJwtSecretKeyMustBeAtLeast256BitsLongAndShouldBeRandomlyGenerated
+  expirationMs: 1800000
+  secret: Ym9wYWlzb2x1dGlvbnNfc2VjcmV0X2tleV9mb3JfZml2ZV8xMl8xMl8yMDI1X3ZlcnlfLXRvbnNfaGVsbG8tX3dvcmxkLXRvbnNfbWFjcm8tdG9uc18tX2hpX3dvcmxk
 logging:
   level:
     root: INFO
     org.springframework.web: DEBUG
     org.springframework.security: DEBUG
     com.example.ErrorLogProcessor: DEBUG
+    org.springframework.web.filter: DEBUG
 #  servlet:
 #    context-path: /test

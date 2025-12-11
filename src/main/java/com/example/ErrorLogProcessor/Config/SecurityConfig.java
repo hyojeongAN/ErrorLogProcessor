@@ -20,7 +20,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import com.example.ErrorLogProcessor.Config.jwt.CustomUserDetailsService;
 import com.example.ErrorLogProcessor.Config.jwt.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
@@ -30,53 +29,65 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-	private final CustomUserDetailsService customUserDetailsService;
-	private final JwtAuthenticationFilter jwtAuthenticationFilter; // ✨✨ 이 필터가 다시 활성화될 거야! ✨✨
-	
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-	
-	// CustomUserDetailsService와 PasswordEncoder를 사용하여 인증 처리를 위임
-	@Bean
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+    
+    @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-		return authenticationConfiguration.getAuthenticationManager();
-	}
+        return authenticationConfiguration.getAuthenticationManager();
+    }
     
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
-    	CorsConfiguration configuration = new CorsConfiguration();
-    	configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:3000"));
-    	configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-    	configuration.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
-    	configuration.setAllowCredentials(true); // 자격 증명 허용 (쿠키, HTTP 인증 등)
-    	configuration.setMaxAge(3600L); // Pre-flight 요청 캐시 시간 (초)
-
-    	
-    	UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration configuration = new CorsConfiguration();
+        // 실제 프론트엔드 개발 서버의 Origin을 정확히 추가합니다. (추가로 http://localhost:3000도 일반적으로 많이 사용)
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "http://127.0.0.1:3000", "http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*")); // 모든 헤더 허용
+        configuration.setAllowCredentials(true); // 자격 증명 (쿠키, HTTP 인증 등) 허용
+        configuration.setMaxAge(3600L); // Pre-flight 요청 캐시 시간 
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // 모든 URL에 대해 위 설정 적용
         return source;
     }
     
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    	http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-    		.csrf(AbstractHttpConfigurer::disable)
-    		.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-    		.httpBasic(AbstractHttpConfigurer::disable)
-    		.formLogin(AbstractHttpConfigurer::disable)
-    		.authorizeHttpRequests(authorize -> authorize
-    		.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-//    		.requestMatchers(HttpMethod.GET, "/api/logs", "api/logs/**").permitAll()
-//    		.requestMatchers("/api/auth/**", "/test-log").permitAll()
-    		.requestMatchers("/api/**").permitAll()
-    		.anyRequest().authenticated());
-    	
-    	// UsernamePasswordAuthenticationFilter 전에 JwtAuthenticationFilter를 추가하여
-        // 매 요청마다 JWT 토큰을 검증하도록 한다.
+        http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(AbstractHttpConfigurer::disable) // CSRF 보호 비활성화 (JWT 사용 시 일반적으로 비활성화)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 사용 안함 (JWT는 토큰 기반이므로)
+            .httpBasic(AbstractHttpConfigurer::disable) // HTTP Basic 인증 비활성화
+            .formLogin(AbstractHttpConfigurer::disable) // Form Login 비활성화
+
+            .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight 요청은 항상 허용
+
+                // JWT 필터에서 건너뛰는 경로와 정확히 일치시켜야 함. 모두 permitAll()
+                // 로그인, 회원가입, 테스트 에러 생성 등 인증 없이 접근 가능한 경로들
+                .requestMatchers("/api/auth/login", "/api/auth/userjoin", "/api/test/**").permitAll()
+                
+                // 관리자 전용 API (ROLE_ADMIN 권한 필요)
+                .requestMatchers("/api/admin/**").hasRole("ADMIN") 
+                
+                // 대시보드
+                .requestMatchers("/api/dashboard/**", "/api/logs/**").authenticated()
+                
+                // 나머지 모든 /api/** 경로는 인증된 사용자만 접근 가능
+//                .requestMatchers("/api/**").authenticated() 
+                
+                // 위에 명시되지 않은 다른 모든 요청도 인증 필요 (가장 포괄적인 규칙)
+                .anyRequest().authenticated()
+            );
+        
+        // UsernamePasswordAuthenticationFilter 이전에 JwtAuthenticationFilter를 추가하여 JWT 토큰을 검증
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-    	
-    	return http.build();
+        
+        return http.build();
     }
 }

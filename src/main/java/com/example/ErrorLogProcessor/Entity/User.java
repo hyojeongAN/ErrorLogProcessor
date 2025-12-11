@@ -25,7 +25,7 @@ import lombok.Setter;
 public class User {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY) // PK 자동 증가
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
 	@Column(name = "loginId", nullable = false, unique = true, length = 50)
@@ -41,10 +41,13 @@ public class User {
 	private String email;
 	
 	@Column(name = "createdAt", nullable = false, updatable = false)
-	private LocalDateTime createdAt; //회원가입한 시간
+	private LocalDateTime createdAt;
 	
 	@Column(name = "updatedAt", nullable = false)
 	private LocalDateTime updatedAt;
+	
+	@Column(nullable = false, length = 20) 
+	private String role; 
 	
 	@PrePersist
 	protected void onCreate() {
@@ -56,5 +59,4 @@ public class User {
 	protected void onUpdate() {
 		this.updatedAt = LocalDateTime.now();
 	}
-
 }
