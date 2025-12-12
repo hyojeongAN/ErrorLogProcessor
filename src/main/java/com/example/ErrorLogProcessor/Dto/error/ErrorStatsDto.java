@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FrequentErrorDto {
+public class ErrorStatsDto {
 
-	private String message;
-	private Long count;
-	private String level;
+	private int recentErrorCount;
+	private int todayErrorCount;
 }

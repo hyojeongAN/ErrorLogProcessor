@@ -31,7 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         List<String> excludeSpecificPaths = Arrays.asList(
                 "/api/auth/login",
-                "/api/auth/register",
                 "/api/auth/userjoin" 
         );
         

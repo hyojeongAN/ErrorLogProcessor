@@ -17,7 +17,7 @@
 
 	<appender name="DB_CUSTOM" class="com.example.ErrorLogProcessor.Config.DbLogAppender">
 		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-			<level>WARN</level> <!-- WARN, ERROR, FATAL만 DB에 저장 -->
+			<level>INFO</level> <!-- WARN, ERROR, FATAL만 DB에 저장 -->
 		</filter>
 	</appender>
 

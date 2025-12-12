@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.ErrorLogProcessor.Dto.error.DailyErrorCountDto;
 import com.example.ErrorLogProcessor.Dto.error.ErrorLevelCountDto;
+import com.example.ErrorLogProcessor.Dto.error.ErrorLogDto;
+import com.example.ErrorLogProcessor.Dto.error.ErrorStatsDto;
 import com.example.ErrorLogProcessor.Dto.error.FrequentErrorDto;
 import com.example.ErrorLogProcessor.Entity.ErrorLog;
 import com.example.ErrorLogProcessor.Repository.ErrorLogRepository;
@@ -29,6 +32,21 @@ public class ErrorLogService {
 
 	private final ErrorLogRepository errorLogRepository;
 	
+	//외부 클라이언트로부터 HTTP 요청으로 받는 에러를 저장하는 메서드 (loginId 자동 포함)
+	@Transactional
+    public ErrorLog saveErrorLog(ErrorLogDto errorLogDto) {
+        ErrorLog errorLog = ErrorLog.builder()
+                .timestamp(errorLogDto.getTimestamp() != null ? errorLogDto.getTimestamp() : LocalDateTime.now())
+                .level(errorLogDto.getLevel())
+                .source(errorLogDto.getSource())
+                .message(errorLogDto.getMessage())
+                .stackTrace(errorLogDto.getStackTrace())
+                .loginId(errorLogDto.getLoginId()) // Controller에서 설정된 loginId 사용
+                .build();
+        return errorLogRepository.save(errorLog);
+    }
+	
+	// 백엔드 자체의 로깅 이벤트를 저장
 	@Transactional
 	public void saveLog(ILoggingEvent event) {
 		String stackTrace = null;
@@ -68,11 +86,17 @@ public class ErrorLogService {
 	 
 	@Transactional(readOnly = true)
 	public List<DailyErrorCountDto> getDailyErrorCounts(LocalDateTime startDate, LocalDateTime endDate) {
+	    List<DailyErrorCountDto> projections;
 	    if (isAdmin()) {
-	        return errorLogRepository.findDailyErrorCounts(startDate, endDate, null); // 관리자는 전체 조회
+	        projections = errorLogRepository.findDailyErrorCounts(startDate, endDate, null); // 관리자는 전체 조회
+	    } else {
+	        String loginId = getCurrentUserLoginId();
+	        projections = errorLogRepository.findDailyErrorCounts(startDate, endDate, loginId); // 일반 사용자는 본인 조회
 	    }
-	    String loginId = getCurrentUserLoginId();
-	    return errorLogRepository.findDailyErrorCounts(startDate, endDate, loginId); // 일반 사용자는 본인 조회
+        // Projection 결과를 DTO로 변환
+        return projections.stream()
+                .map(p -> new DailyErrorCountDto(p.getDate(), p.getCount()))
+                .collect(Collectors.toList());
 	}
 	 
 	@Transactional(readOnly = true)
@@ -98,7 +122,7 @@ public class ErrorLogService {
 	 
 	 private String getCurrentUserLoginId() {
 		 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		 if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+		 if (authentication != null && authentication.isAuthenticated() && !"anonymosUser".equals(authentication.getPrincipal())) {
 			 Object principal = authentication.getPrincipal();
 			 if (principal instanceof UserDetails) {
 				 return ((UserDetails) principal).getUsername();
@@ -116,4 +140,17 @@ public class ErrorLogService {
 		 }
 		 return false;
 	 }
+	 
+	 public ErrorStatsDto getUserErrorStatistics(String loginId) {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime since = now.minusDays(30);
+		LocalDateTime startOfToday = now.toLocalDate().atStartOfDay();
+		
+		int recentErrorCount = errorLogRepository.countRecentErrors(loginId, since);
+		int todayErrorCount = errorLogRepository.countTodayErrors(loginId, startOfToday);
+		 
+		 return new ErrorStatsDto(recentErrorCount, todayErrorCount);
+		 
+	 }
+
 }
