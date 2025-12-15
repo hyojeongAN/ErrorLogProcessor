@@ -56,4 +56,10 @@ public interface ErrorLogRepository extends JpaRepository<ErrorLog, Long>, JpaSp
     
     @Query("SELECT COUNT(e) FROM ErrorLog e WHERE e.loginId = :loginId AND e.timestamp >= :startOfToday")
     int countTodayErrors(@Param("loginId") String loginId, @Param("startOfToday") LocalDateTime StartOfToday);
+
+    @Query("SELECT COUNT(e) FROM ErrorLog e WHERE e.timestamp BETWEEN :startDate AND :endDate")
+    long countByTimestampBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COUNT(e) FROM ErrorLog e WHERE e.timestamp BETWEEN :startDate AND :endDate AND e.loginId = :loginId")
+    long countByTimestampBetweenAndLoginId(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, @Param("loginId") String loginId);
 }

@@ -20,7 +20,9 @@ import com.example.ErrorLogProcessor.Dto.error.ErrorLogDto;
 import com.example.ErrorLogProcessor.Dto.error.ErrorStatsDto;
 import com.example.ErrorLogProcessor.Dto.error.FrequentErrorDto;
 import com.example.ErrorLogProcessor.Entity.ErrorLog;
+import com.example.ErrorLogProcessor.Entity.User;
 import com.example.ErrorLogProcessor.Repository.ErrorLogRepository;
+import com.example.ErrorLogProcessor.Repository.UserRepository;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxy;
@@ -31,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class ErrorLogService {
 
 	private final ErrorLogRepository errorLogRepository;
+	private final UserRepository userRepository;
 	
 	//외부 클라이언트로부터 HTTP 요청으로 받는 에러를 저장하는 메서드 (loginId 자동 포함)
 	@Transactional
@@ -152,5 +155,29 @@ public class ErrorLogService {
 		 return new ErrorStatsDto(recentErrorCount, todayErrorCount);
 		 
 	 }
+	 
+		public long countRecentOneHourErrorsForCurrentUser(String currentUserLoginId) {
 
+			System.out.println("서비스 : 파라미터로 받은 loginId -> " + currentUserLoginId);
+
+			LocalDateTime now = LocalDateTime.now();
+			LocalDateTime oneHourAgo = now.minusHours(1);
+			System.out.println("서비스:현재 시간 -> " + now + ", 1시간 전 시간 -> " + oneHourAgo);
+			String userRole = userRepository.findByLoginId(currentUserLoginId).map(User::getRole).orElse("USER");
+
+			System.out.println("서비스: 사용자 " + currentUserLoginId + "의 역할 -> " + userRole);
+
+			long count;
+// 2. 역할에 따라 다른 레파지토리 메서드 호출!
+			if ("ROLE_ADMIN".equals(userRole)) { // 역할이 "ROLE_ADMIN"이라면
+	            System.out.println("서비스: 관리자이므로 전체 에러 개수를 가져옴.");
+	            count = errorLogRepository.countByTimestampBetween(oneHourAgo, now);
+	        } else {
+	            System.out.println("서비스: 일반 사용자이므로 해당 loginId의 에러 개수를 가져옴.");
+	            count = errorLogRepository.countByTimestampBetweenAndLoginId(oneHourAgo, now, currentUserLoginId);
+	        }
+
+	        System.out.println("서비스: 최종 반환된 에러 개수 -> " + count);
+	        return count;
+	    }
 }

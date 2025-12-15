@@ -1,8 +1,10 @@
 package com.example.ErrorLogProcessor.Controller;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors; 
 
 import org.slf4j.Logger;
@@ -42,12 +44,32 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ErrorLogController {
 	
-	private final ErrorLogRepository errorLogrepository; 
+	private final ErrorLogRepository errorLogRepository; 
 	private final ErrorLogService errorLogService;
 	
 	private static final Logger log = LoggerFactory.getLogger(ErrorLogController.class);
 	
 	
+	@GetMapping("/test/error")
+    public String generateError() {
+		log.info("`/test/error` 엔드포인트 호출됨 - 곧 에러를 발생시킵니다!");
+        // 일부러 RuntimeException을 발생시켜서 Spring Boot가 ERROR 로그를 찍게 유도한다.
+        throw new RuntimeException("이것은 의도적으로 발생시킨 테스트 에러입니다! 로그를 확인하세요!");
+    }
+
+    @GetMapping("/test/error2")
+    public String generateAnotherError() {
+    	log.error("`/test/error2` 엔드포인트 호출됨 - 직접 ERROR 로그를 발생시킵니다!");
+        // 직접 ERROR 로그를 찍어볼 수도 있어.
+        // 위에 RuntimeException이 더 확실하게 Spring Framework단에서 ERROR 로그를 유발한다.
+        return "ERROR 로그 메시지를 직접 출력했습니다.";
+    }
+	
+	
+    
+    
+    
+    
 	@PostMapping("/logs")
     public ResponseEntity<ErrorLog> createErrorLog(@RequestBody ErrorLogDto errorLogDto) {
         // 현재 인증된 사용자의 loginId를 JWT 토큰에서 추출하여 errorLogDto에 설정
@@ -141,7 +163,7 @@ public class ErrorLogController {
 		
 		};
 
-		return errorLogrepository.findAll(spec, pageable);
+		return errorLogRepository.findAll(spec, pageable);
 	}
 	
     private UserPrincipal getCurrentUserPrincipal() {
@@ -214,4 +236,20 @@ public class ErrorLogController {
 		
 		return ResponseEntity.ok(stats);
 	}
+	
+	@GetMapping("/dashboard/recent-error-count")
+    public Map<String, Long> recentErrorCount(Principal principal) {
+        if (principal != null) {
+            String currentUserLoginId = principal.getName();
+            System.out.println("컨트롤러: 현재 로그인 사용자 loginId -> " + currentUserLoginId);
+
+            long count = errorLogService.countRecentOneHourErrorsForCurrentUser(currentUserLoginId);
+
+            System.out.println("컨트롤러: 반환되는 에러 개수 -> " + count);
+            return Map.of("count", count);
+        } else {
+            System.out.println("컨트롤러: 인증되지 않은 사용자 접근 (Principal is null)");
+            return Map.of("count", 0L);
+        }
+    }
 }
