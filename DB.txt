@@ -8,12 +8,33 @@ SHOW TABLES;
 
 SELECT VERSION();
 
-SELECT * FROM error_logs;
+SELECT * FROM error_logs
+    ORDER BY id DESC;
 DESC error_logs;
+SELECT * FROM error_logs ORDER BY id DESC;
 
 SELECT * FROM users;
 DESC users;
 
+#TRUNCATE TABLE error_logs;
 
 #delete from error_log;
 #DROP TABLE error_log;
+
+SELECT * FROM error_logs WHERE LEVEL IN ('INFO', 'DEBUG') ORDER BY TIMESTAMP DESC LIMIT 10;
+
+
+CREATE USER 'test_user'@'%' IDENTIFIED BY 'test_password';
+GRANT ALL PRIVILEGES ON errorlogdb.* TO 'test_user'@'%';
+FLUSH PRIVILEGES;
+
+SHOW GLOBAL VARIABLES LIKE 'init_connect';
+SET GLOBAL init_connect = '';
+FLUSH PRIVILEGES;
+
+SELECT @@global.time_zone, @@session.time_zone;
+
+
+SELECT LEVEL, COUNT(*) FROM error_logs GROUP BY LEVEL;
+
+SELECT COUNT(*) FROM error_logs WHERE login_id = 'user';
